@@ -6,10 +6,10 @@
     >
       <div>
         <h1 class="text-2xl font-bold text-slate-900">
-          Dashboard Logística
+          PCI DSS
         </h1>
         <p class="text-sm text-slate-500">
-          Visão geral da operação do dia
+          Acompanhamento de aderência dos produtos Gertec voltados a pagamento
         </p>
       </div>
 
@@ -25,9 +25,7 @@
   <!-- Conteúdo principal -->
   <main class="max-w-7xl mx-auto px-6 py-8">
     <!-- Cards de métricas -->
-    <section
-      class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8"
-    >
+    <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
       <div
         *ngFor="let card of metrics"
         class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm"
@@ -53,17 +51,66 @@
       </div>
     </section>
 
+    <!-- Produtos -->
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-8">
+      <div class="mb-6">
+        <h2 class="text-xl font-semibold text-slate-900">
+          Produtos monitorados
+        </h2>
+        <p class="text-sm text-slate-500">
+          Visão de aderência por produto para evolução ao PCI DSS
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div
+          *ngFor="let product of products"
+          class="border border-slate-200 rounded-2xl p-5 bg-slate-50 hover:bg-white transition"
+        >
+          <div class="flex items-start justify-between mb-3">
+            <div>
+              <h3 class="text-lg font-bold text-slate-900">
+                {{ product.name }}
+              </h3>
+              <span
+                class="inline-block mt-2 text-xs font-semibold px-2 py-1 rounded-full"
+                [ngClass]="getAreaClass(product.area)"
+              >
+                {{ product.area }}
+              </span>
+            </div>
+
+            <span
+              class="text-xs font-semibold px-3 py-1 rounded-full"
+              [ngClass]="getAdherenceClass(product.adherence)"
+            >
+              {{ product.adherence }}%
+            </span>
+          </div>
+
+          <p class="text-sm text-slate-600 mb-4">
+            {{ product.description }}
+          </p>
+
+          <button
+            (click)="selectProduct(product.name)"
+            class="w-full bg-slate-900 hover:bg-slate-800 text-white py-2 rounded-xl text-sm font-medium transition cursor-pointer"
+          >
+            Analisar com IA
+          </button>
+        </div>
+      </div>
+    </section>
+
     <!-- Lista principal de atividades -->
-    <section
-      class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6"
-    >
+    <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
       <div class="flex items-center justify-between mb-6">
         <div>
           <h2 class="text-xl font-semibold text-slate-900">
             Atividades principais
           </h2>
           <p class="text-sm text-slate-500">
-            Acompanhe o andamento da operação
+            Acompanhe os itens necessários para evolução dos produtos ao PCI DSS
           </p>
         </div>
       </div>
@@ -99,25 +146,41 @@
   </main>
 
   <!-- Botão flutuante da IA -->
-  <button
-    (click)="toggleAiPanel()"
-    class="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full shadow-lg font-semibold transition cursor-pointer"
+<button
+  (click)="toggleAiPanel()"
+  class="fixed bottom-6 right-6 flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-white px-5 py-3 rounded-full shadow-xl font-semibold transition-all cursor-pointer"
+>
+  <!-- Ícone de chat -->
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    class="w-5 h-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
   >
-    IA
-  </button>
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      d="M8 10h8M8 14h5m-9 7l3-3h11a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+    />
+  </svg>
+
+  GerzInha
+</button>
 
   <!-- Painel da IA -->
   <div
     *ngIf="isAiPanelOpen"
-    class="fixed bottom-24 right-6 w-[360px] max-w-[calc(100vw-2rem)] bg-white border border-slate-200 rounded-2xl shadow-xl p-5"
+    class="fixed bottom-24 right-6 w-[390px] max-w-[calc(100vw-2rem)] bg-white border border-slate-200 rounded-2xl shadow-xl p-5"
   >
     <div class="flex items-start justify-between mb-4">
       <div>
         <h3 class="text-lg font-bold text-slate-900">
-          Assistente IA
+          Assistente IA PCI DSS
         </h3>
         <p class="text-sm text-slate-500">
-          Sugestões automáticas com base nos indicadores
+          Leitura inteligente de aderência por produto e visão consolidada
         </p>
       </div>
 
@@ -129,7 +192,16 @@
       </button>
     </div>
 
-    <!-- Prompt simulado -->
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-slate-700 mb-2">
+        Produto selecionado
+      </label>
+
+      <div class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700">
+        {{ selectedProduct }}
+      </div>
+    </div>
+
     <div class="mb-4">
       <label class="block text-sm font-medium text-slate-700 mb-2">
         Solicitação simulada
@@ -137,24 +209,21 @@
 
       <textarea
         class="w-full border border-slate-200 rounded-xl p-3 text-sm text-slate-700 bg-slate-50 resize-none outline-none"
-        rows="3"
+        rows="4"
         [value]="mockPrompt"
         readonly
       ></textarea>
     </div>
 
-    <!-- Leitura da IA -->
     <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4">
       <p class="text-sm font-medium text-slate-700 mb-2">
         Leitura da IA
       </p>
       <p class="text-sm text-slate-500">
-        A IA identificou aumento no volume operacional e sugeriu
-        priorização de atividades críticas.
+        {{ aiSummary }}
       </p>
     </div>
 
-    <!-- Sugestões geradas -->
     <div class="mb-4">
       <p class="text-sm font-medium text-slate-700 mb-2">
         Sugestões geradas
