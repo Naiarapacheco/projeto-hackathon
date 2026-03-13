@@ -55,7 +55,7 @@ export class Dashboard implements OnInit {
     {
       title: 'Itens críticos pendentes',
       value: '9',
-      badge: '-2',
+      badge: 'Em aberto',
       description: 'Pendências prioritárias para evolução rumo ao PCI DSS'
     }
   ];
@@ -66,35 +66,40 @@ export class Dashboard implements OnInit {
       area: 'Engenharia',
       adherence: 76,
       statusLabel: 'Atenção',
-      description: 'Necessita evolução em hardening, evidências e validações de segurança'
+      description:
+        'Necessita evolução em hardening, evidências e validações de segurança'
     },
     {
       name: 'MP15',
       area: 'Engenharia',
       adherence: 72,
       statusLabel: 'Atenção',
-      description: 'Ainda possui lacunas em documentação técnica e trilha de auditoria'
+      description:
+        'Ainda possui lacunas em documentação técnica e trilha de auditoria'
     },
     {
       name: 'SmartPOS',
       area: 'Engenharia',
       adherence: 83,
       statusLabel: 'Evoluindo',
-      description: 'Bom nível de aderência, com ajustes finais em controles complementares'
+      description:
+        'Bom nível de aderência, com ajustes finais em controles complementares'
     },
     {
       name: 'Pinpad PPC 930',
       area: 'Engenharia',
       adherence: 81,
       statusLabel: 'Evoluindo',
-      description: 'Necessita refinamento de evidências e revisão de requisitos pendentes'
+      description:
+        'Necessita refinamento de evidências e revisão de requisitos pendentes'
     },
     {
       name: 'Tap2Pay',
       area: 'Plataforma',
       adherence: 86,
       statusLabel: 'Próximo da meta',
-      description: 'Faltam adequações finais em controles, governança e evidências operacionais'
+      description:
+        'Faltam adequações finais em controles, governança e evidências operacionais'
     }
   ];
 
@@ -106,7 +111,8 @@ export class Dashboard implements OnInit {
     },
     {
       title: 'Revisar gaps de segurança do Tap2Pay',
-      subtitle: 'Mapear pendências funcionais e evidências ainda não formalizadas',
+      subtitle:
+        'Mapear pendências funcionais e evidências ainda não formalizadas',
       status: 'Pendente'
     },
     {
@@ -118,7 +124,6 @@ export class Dashboard implements OnInit {
   ];
 
   isAiPanelOpen = false;
-
   selectedProduct = 'MP35';
 
   mockPrompt =
@@ -130,23 +135,25 @@ export class Dashboard implements OnInit {
   aiSuggestions: TaskItem[] = [
     {
       title: 'Formalizar evidências de segurança do MP35',
-      subtitle: 'Consolidar documentação técnica e comprovações exigidas para auditoria PCI DSS',
+      subtitle:
+        'Consolidar documentação técnica e comprovações exigidas para auditoria PCI DSS',
       status: 'Pendente'
     },
     {
       title: 'Revisar controles pendentes do Tap2Pay',
-      subtitle: 'Mapear os itens restantes para elevar a aderência da plataforma',
+      subtitle:
+        'Mapear os itens restantes para elevar a aderência da plataforma',
       status: 'Pendente'
     },
     {
       title: 'Criar visão consolidada de gaps por produto',
-      subtitle: 'Comparar pendências entre terminais e plataforma para priorização',
+      subtitle:
+        'Comparar pendências entre terminais e plataforma para priorização',
       status: 'Pendente'
     }
   ];
 
   ngOnInit(): void {
-    //this.loadMetrics();
     this.loadTasks();
     this.removeExpiredCompletedTasks();
   }
@@ -163,11 +170,9 @@ export class Dashboard implements OnInit {
   selectProduct(productName: string): void {
     this.selectedProduct = productName;
 
-    this.mockPrompt =
-      `Analise o produto ${productName} e informe o que ainda falta para ele avançar no processo de aderência ao PCI DSS. Depois faça uma leitura geral dos equipamentos e da plataforma Tap2Pay.`;
+    this.mockPrompt = `Analise o produto ${productName} e informe o que ainda falta para ele avançar no processo de aderência ao PCI DSS. Depois faça uma leitura geral dos equipamentos e da plataforma Tap2Pay.`;
 
-    this.aiSummary =
-      `${productName} ainda possui lacunas em aderência PCI DSS relacionadas a controles, evidências e validações técnicas. No cenário consolidado, a IA recomenda priorizar os produtos com menor percentual de aderência para acelerar a evolução do portfólio.`;
+    this.aiSummary = `${productName} ainda possui lacunas em aderência PCI DSS relacionadas a controles, evidências e validações técnicas. No cenário consolidado, a IA recomenda priorizar os produtos com menor percentual de aderência para acelerar a evolução do portfólio.`;
 
     this.aiSuggestions = [
       {
@@ -177,12 +182,14 @@ export class Dashboard implements OnInit {
       },
       {
         title: `Consolidar evidências técnicas do ${productName}`,
-        subtitle: `Organizar documentação e comprovações necessárias para auditoria`,
+        subtitle:
+          'Organizar documentação e comprovações necessárias para auditoria',
         status: 'Pendente'
       },
       {
         title: 'Atualizar visão consolidada de aderência',
-        subtitle: 'Comparar engenharia e plataforma para direcionar as próximas ações',
+        subtitle:
+          'Comparar engenharia e plataforma para direcionar as próximas ações',
         status: 'Pendente'
       }
     ];
@@ -254,12 +261,15 @@ export class Dashboard implements OnInit {
     const tap2payAdherence =
       this.products.find((product) => product.name === 'Tap2Pay')?.adherence ?? 0;
 
+    const pendingItems = this.calculatePendingItems();
+
     this.metrics = [
       {
         title: 'Aderência geral PCI DSS',
         value: `${averageAdherence}%`,
         badge: '+1%',
-        description: 'Percentual consolidado considerando terminais e plataforma'
+        description:
+          'Percentual consolidado considerando terminais e plataforma'
       },
       {
         title: 'Terminais - Engenharia',
@@ -271,15 +281,31 @@ export class Dashboard implements OnInit {
         title: 'Tap2Pay - Plataforma',
         value: `${tap2payAdherence}%`,
         badge: '1 produto',
-        description: 'Aderência atual da plataforma ao processo de conformidade'
+        description:
+          'Aderência atual da plataforma ao processo de conformidade'
       },
       {
         title: 'Itens críticos pendentes',
-        value: `${this.randomBetween(6, 10)}`,
-        badge: '-1',
-        description: 'Pendências prioritárias para evolução rumo ao PCI DSS'
+        value: `${pendingItems}`,
+        badge: pendingItems === 0 ? 'Conforme' : 'Em aberto',
+        description:
+          pendingItems === 0
+            ? 'Todos os produtos atingiram 100% de aderência ao PCI DSS'
+            : 'Pendências prioritárias para evolução rumo ao PCI DSS'
       }
     ];
+  }
+
+  private calculatePendingItems(): number {
+    const missingPoints = this.products.reduce((accumulator, product) => {
+      return accumulator + (100 - product.adherence);
+    }, 0);
+
+    if (missingPoints === 0) {
+      return 0;
+    }
+
+    return Math.ceil(missingPoints / 10);
   }
 
   private calculateAverageAdherence(): number {
@@ -292,7 +318,10 @@ export class Dashboard implements OnInit {
   }
 
   private calculateAreaAverage(area: 'Engenharia' | 'Plataforma'): number {
-    const filteredProducts = this.products.filter((product) => product.area === area);
+    const filteredProducts = this.products.filter(
+      (product) => product.area === area
+    );
+
     const total = filteredProducts.reduce(
       (accumulator, product) => accumulator + product.adherence,
       0
@@ -306,7 +335,8 @@ export class Dashboard implements OnInit {
     localStorage.setItem('dashboard_products', JSON.stringify(this.products));
   }
 
-  /** private loadMetrics(): void {
+  /*
+  private loadMetrics(): void {
     const savedMetrics = localStorage.getItem('dashboard_metrics');
     const savedProducts = localStorage.getItem('dashboard_products');
 
@@ -317,7 +347,8 @@ export class Dashboard implements OnInit {
     if (savedProducts) {
       this.products = JSON.parse(savedProducts);
     }
-  } **/
+  }
+  */
 
   private saveTasks(): void {
     localStorage.setItem('dashboard_tasks', JSON.stringify(this.taskList));
