@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 
 type TaskStatus = 'Concluído' | 'Em andamento' | 'Pendente';
 
@@ -26,16 +25,17 @@ interface ProductComplianceItem {
   description: string;
 }
 
-interface ChatMessage {
-  sender: 'ai' | 'user';
-  text: string;
-  time: string;
+interface AiSuggestion {
+  productName: string;
+  title: string;
+  summary: string;
+  fullText: string;
 }
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
@@ -45,25 +45,25 @@ export class Dashboard implements OnInit {
       title: 'Aderência geral PCI DSS',
       value: '81%',
       badge: '+4%',
-      description: 'Percentual consolidado considerando terminais e plataforma'
+      description: 'Percentual consolidado de conformidade considerando terminais e plataforma'
     },
     {
       title: 'Terminais - Engenharia',
       value: '78%',
       badge: '4 produtos',
-      description: 'Aderência média dos equipamentos de pagamento'
+      description: 'Percentual médio de conformidade dos equipamentos de pagamento'
     },
     {
       title: 'Tap2Pay - Plataforma',
       value: '86%',
       badge: '1 produto',
-      description: 'Aderência atual da plataforma ao processo de conformidade'
+      description: 'Nível atual de conformidade da plataforma em relação ao PCI DSS'
     },
     {
       title: 'Itens críticos pendentes',
       value: '4',
       badge: 'Em aberto',
-      description: 'Produtos com pendências para atingir 100% de aderência ao PCI DSS'
+      description: 'Produtos com pendências para atingir 100% de conformidade'
     }
   ];
 
@@ -74,7 +74,7 @@ export class Dashboard implements OnInit {
       adherence: 76,
       statusLabel: 'Atenção',
       description:
-        'Necessita evolução em hardening, evidências e validações de segurança'
+        '76% em conformidade. Necessita evolução em hardening, evidências e validações de segurança.'
     },
     {
       name: 'MP15',
@@ -82,7 +82,7 @@ export class Dashboard implements OnInit {
       adherence: 72,
       statusLabel: 'Atenção',
       description:
-        'Ainda possui lacunas em documentação técnica e trilha de auditoria'
+        '72% em conformidade. Ainda possui lacunas em documentação técnica e trilha de auditoria.'
     },
     {
       name: 'SmartPOS',
@@ -90,7 +90,7 @@ export class Dashboard implements OnInit {
       adherence: 83,
       statusLabel: 'Evoluindo',
       description:
-        'Bom nível de aderência, com ajustes finais em controles complementares'
+        '83% em conformidade. Bom nível de aderência, com ajustes finais em controles complementares.'
     },
     {
       name: 'Pinpad PPC 930',
@@ -98,7 +98,7 @@ export class Dashboard implements OnInit {
       adherence: 81,
       statusLabel: 'Evoluindo',
       description:
-        'Necessita refinamento de evidências e revisão de requisitos pendentes'
+        '81% em conformidade. Necessita refinamento de evidências e revisão de requisitos pendentes.'
     },
     {
       name: 'Tap2Pay',
@@ -106,7 +106,7 @@ export class Dashboard implements OnInit {
       adherence: 86,
       statusLabel: 'Próximo da meta',
       description:
-        'Faltam adequações finais em controles, governança e evidências operacionais'
+        '86% em conformidade. Faltam adequações finais em controles, governança e evidências operacionais.'
     }
   ];
 
@@ -118,8 +118,7 @@ export class Dashboard implements OnInit {
     },
     {
       title: 'Revisar gaps de segurança do Tap2Pay',
-      subtitle:
-        'Mapear pendências funcionais e evidências ainda não formalizadas',
+      subtitle: 'Mapear pendências funcionais e evidências ainda não formalizadas',
       status: 'Pendente'
     },
     {
@@ -130,45 +129,35 @@ export class Dashboard implements OnInit {
     }
   ];
 
+  aiSuggestions: AiSuggestion[] = [
+    {
+      productName: 'Tap2Pay',
+      title: 'Reporte de vulnerabilidades no T2P',
+      summary:
+        'Implementar um fluxo formal para que usuários do T2P reportem vulnerabilidades, com investigação e tratamento definidos pela Gertec...',
+      fullText:
+        'A GerzInhA recomenda implementar um programa de reporte de vulnerabilidades para usuários do T2P, com um fluxo definido para recebimento, investigação, classificação e tratamento das vulnerabilidades reportadas.'
+    },
+    {
+      productName: 'Tap2Pay',
+      title: 'Canal formal para reporte pelo usuário',
+      summary:
+        'Documentar como a Gertec disponibiliza ao usuário do T2P um canal claro e rastreável para reporte de vulnerabilidades...',
+      fullText:
+        'A GerzInhA recomenda adaptar e documentar como a Gertec disponibiliza ao usuário do T2P um canal formal para reporte de vulnerabilidades identificadas, garantindo clareza no processo e rastreabilidade das tratativas.'
+    },
+    {
+      productName: 'MP35 / SOs suportados',
+      title: 'Governança de sistemas operacionais',
+      summary:
+        'Definir processo recorrente de scan de vulnerabilidades e critérios para inclusão ou remoção de sistemas operacionais suportados...',
+      fullText:
+        'A GerzInhA recomenda estabelecer um processo recorrente de scan de vulnerabilidades nos sistemas operacionais suportados, com critérios definidos para inclusão de novos SOs e remoção de versões com base em análises de risco e segurança.'
+    }
+  ];
+
   isAiPanelOpen = false;
   selectedProduct = 'MP35';
-
-  mockPrompt =
-    'O que ainda falta para o MP35 atingir 100% de aderência ao PCI DSS?';
-
-  aiSummary =
-    'A IA identificou que o MP35 ainda depende de ajustes em controles técnicos, formalização de evidências e revisão de requisitos pendentes.';
-
-  aiSuggestions: TaskItem[] = [
-    {
-      title: 'Formalizar evidências de segurança do MP35',
-      subtitle:
-        'Consolidar documentação técnica e comprovações exigidas para auditoria PCI DSS',
-      status: 'Pendente'
-    },
-    {
-      title: 'Revisar controles pendentes do Tap2Pay',
-      subtitle:
-        'Mapear os itens restantes para elevar a aderência da plataforma',
-      status: 'Pendente'
-    },
-    {
-      title: 'Criar visão consolidada de gaps por produto',
-      subtitle:
-        'Comparar pendências entre terminais e plataforma para priorização',
-      status: 'Pendente'
-    }
-  ];
-
-  chatInput = 'O que ainda falta para o MP35 atingir 100% de aderência ao PCI DSS?';
-
-  chatMessages: ChatMessage[] = [
-    {
-      sender: 'ai',
-      text: 'Olá! Sou a GerzInhA. Posso analisar a aderência PCI DSS de um produto e sugerir os próximos passos.',
-      time: '16:48'
-    }
-  ];
 
   ngOnInit(): void {
     this.loadTasks();
@@ -187,93 +176,110 @@ export class Dashboard implements OnInit {
   selectProduct(productName: string): void {
     this.selectedProduct = productName;
     this.isAiPanelOpen = true;
-    this.chatInput = `O que ainda falta para o ${productName} atingir 100% de aderência ao PCI DSS?`;
+    this.generateSuggestionFromSelectedProduct(productName);
   }
 
-  sendChatMessage(): void {
-    const question = this.chatInput.trim();
+  private generateSuggestionFromSelectedProduct(productName: string): void {
+    const suggestion = this.buildSuggestionByProduct(productName);
 
-    if (!question) {
+    const alreadyExists = this.aiSuggestions.some(
+      (item) =>
+        item.productName === suggestion.productName &&
+        item.title === suggestion.title
+    );
+
+    if (!alreadyExists) {
+      this.aiSuggestions = [suggestion, ...this.aiSuggestions];
+    }
+  }
+
+  private buildSuggestionByProduct(productName: string): AiSuggestion {
+    if (productName === 'Tap2Pay') {
+      return {
+        productName,
+        title: 'Canal formal para reporte pelo usuário',
+        summary:
+          'A GerzInhA recomenda adaptar e documentar como a Gertec disponibiliza ao usuário do T2P um canal formal para reporte de vulnerabilidades...',
+        fullText:
+          'A GerzInhA recomenda adaptar e documentar como a Gertec disponibiliza ao usuário do T2P um canal formal para reporte de vulnerabilidades identificadas, garantindo clareza no processo e rastreabilidade das tratativas.'
+      };
+    }
+
+    if (productName === 'MP35') {
+      return {
+        productName,
+        title: 'Governança de sistemas operacionais',
+        summary:
+          'A GerzInhA recomenda definir processo recorrente de scan de vulnerabilidades e critérios para inclusão ou remoção de sistemas operacionais...',
+        fullText:
+          'A GerzInhA recomenda estabelecer um processo recorrente de scan de vulnerabilidades nos sistemas operacionais suportados, com critérios definidos para inclusão de novos SOs e remoção de versões com base em análises de risco e segurança.'
+      };
+    }
+
+    if (productName === 'MP15') {
+      return {
+        productName,
+        title: 'Formalização de evidências técnicas',
+        summary:
+          'A GerzInhA recomenda consolidar documentação técnica e trilha de auditoria para elevar o nível de conformidade do MP15...',
+        fullText:
+          'A GerzInhA recomenda consolidar a documentação técnica, a trilha de auditoria e os registros de validação do MP15, reduzindo lacunas documentais e fortalecendo a comprovação de conformidade.'
+      };
+    }
+
+    if (productName === 'SmartPOS') {
+      return {
+        productName,
+        title: 'Finalização de controles complementares',
+        summary:
+          'A GerzInhA recomenda concluir controles complementares de segurança e validar as evidências restantes do SmartPOS...',
+        fullText:
+          'A GerzInhA recomenda concluir os controles complementares de segurança do SmartPOS e validar as evidências restantes para acelerar a evolução do produto rumo à conformidade total.'
+      };
+    }
+
+    return {
+      productName,
+      title: 'Revisão de requisitos pendentes do produto',
+      summary:
+        `A GerzInhA recomenda revisar os requisitos pendentes do ${productName} e consolidar as evidências necessárias para auditoria...`,
+      fullText:
+        `A GerzInhA recomenda revisar os requisitos pendentes do ${productName}, consolidar evidências técnicas e definir um plano de ação para elevar o percentual de conformidade do produto em relação ao PCI DSS.`
+    };
+  }
+
+  addSuggestionToTasks(suggestion: AiSuggestion): void {
+    const taskAlreadyExists = this.taskList.some(
+      (task) => task.title === suggestion.title
+    );
+
+    if (taskAlreadyExists) {
       return;
     }
 
-    this.chatMessages.push({
-      sender: 'user',
-      text: question,
-      time: this.getCurrentTime()
-    });
-
-    this.mockPrompt = question;
-    this.generateAiResponse(question);
-    this.chatInput = '';
-  }
-
-  private generateAiResponse(question: string): void {
-    const productName = this.detectProductFromQuestion(question) ?? this.selectedProduct;
-
-    this.selectedProduct = productName;
-
-    this.aiSummary =
-      `${productName} ainda possui lacunas em aderência PCI DSS relacionadas a controles, evidências e validações técnicas. A recomendação é priorizar os itens com maior impacto para acelerar a evolução do produto.`;
-
-    this.chatMessages.push({
-      sender: 'ai',
-      text:
-        `Analisando o ${productName}, ainda faltam evidências técnicas, revisão de controles de segurança e consolidação documental para avançar na aderência ao PCI DSS. Com base nisso, gerei sugestões de ação para o time.`,
-      time: this.getCurrentTime()
-    });
-
-    this.aiSuggestions = [
+    this.taskList = [
       {
-        title: `Mapear pendências críticas do ${productName}`,
-        subtitle: `Levantar os itens restantes para elevar a aderência do ${productName} ao PCI DSS`,
+        title: suggestion.title,
+        subtitle: suggestion.summary,
         status: 'Pendente'
       },
-      {
-        title: `Consolidar evidências técnicas do ${productName}`,
-        subtitle:
-          'Organizar documentação e comprovações necessárias para auditoria PCI DSS',
-        status: 'Pendente'
-      },
-      {
-        title: `Priorizar plano de ação do ${productName}`,
-        subtitle:
-          'Definir próximos passos para acelerar a aderência e reduzir pendências abertas',
-        status: 'Pendente'
-      }
+      ...this.taskList
     ];
-  }
 
-  private detectProductFromQuestion(question: string): string | null {
-    const normalizedQuestion = question.toLowerCase();
-
-    const matchedProduct = this.products.find((product) =>
-      normalizedQuestion.includes(product.name.toLowerCase())
-    );
-
-    return matchedProduct ? matchedProduct.name : null;
-  }
-
-  private getCurrentTime(): string {
-    return new Date().toLocaleTimeString('pt-BR', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
-
-  addAiSuggestionsToTasks(): void {
-    const newSuggestions = this.aiSuggestions.filter(
-      (suggestion) =>
-        !this.taskList.some(
-          (task) =>
-            task.title === suggestion.title &&
-            task.subtitle === suggestion.subtitle
-        )
-    );
-
-    this.taskList = [...newSuggestions, ...this.taskList];
     this.saveTasks();
-    this.isAiPanelOpen = false;
+  }
+
+  downloadSuggestion(suggestion: AiSuggestion): void {
+    const content = `${suggestion.title}\n\nProduto: ${suggestion.productName}\n\n${suggestion.fullText}`;
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${suggestion.productName.toLowerCase().replace(/\s+/g, '-')}-recomendacao.txt`;
+    link.click();
+
+    window.URL.revokeObjectURL(url);
   }
 
   changeStatus(task: TaskItem): void {
@@ -318,7 +324,8 @@ export class Dashboard implements OnInit {
 
       return {
         ...product,
-        adherence: updatedAdherence
+        adherence: updatedAdherence,
+        description: `${updatedAdherence}% em conformidade. ${this.getProductBaseDescription(product.name)}`
       };
     });
 
@@ -335,20 +342,20 @@ export class Dashboard implements OnInit {
         value: `${averageAdherence}%`,
         badge: '+1%',
         description:
-          'Percentual consolidado considerando terminais e plataforma'
+          'Percentual consolidado de conformidade considerando terminais e plataforma'
       },
       {
         title: 'Terminais - Engenharia',
         value: `${terminalsAverage}%`,
         badge: '4 produtos',
-        description: 'Aderência média dos equipamentos de pagamento'
+        description: 'Percentual médio de conformidade dos equipamentos de pagamento'
       },
       {
         title: 'Tap2Pay - Plataforma',
         value: `${tap2payAdherence}%`,
         badge: '1 produto',
         description:
-          'Aderência atual da plataforma ao processo de conformidade'
+          'Nível atual de conformidade da plataforma em relação ao PCI DSS'
       },
       {
         title: 'Itens críticos pendentes',
@@ -356,10 +363,30 @@ export class Dashboard implements OnInit {
         badge: pendingItems === 0 ? 'Conforme' : 'Em aberto',
         description:
           pendingItems === 0
-            ? 'Todos os produtos atingiram 100% de aderência ao PCI DSS'
-            : 'Produtos com pendências para atingir 100% de aderência ao PCI DSS'
+            ? 'Todos os produtos atingiram 100% de conformidade'
+            : 'Produtos com pendências para atingir 100% de conformidade'
       }
     ];
+  }
+
+  private getProductBaseDescription(productName: string): string {
+    if (productName === 'MP35') {
+      return 'Necessita evolução em hardening, evidências e validações de segurança.';
+    }
+
+    if (productName === 'MP15') {
+      return 'Ainda possui lacunas em documentação técnica e trilha de auditoria.';
+    }
+
+    if (productName === 'SmartPOS') {
+      return 'Bom nível de aderência, com ajustes finais em controles complementares.';
+    }
+
+    if (productName === 'Pinpad PPC 930') {
+      return 'Necessita refinamento de evidências e revisão de requisitos pendentes.';
+    }
+
+    return 'Faltam adequações finais em controles, governança e evidências operacionais.';
   }
 
   private calculatePendingItems(): number {
@@ -447,4 +474,4 @@ export class Dashboard implements OnInit {
   getProgressBarWidth(value: number): string {
     return `${value}%`;
   }
-}
+} 
