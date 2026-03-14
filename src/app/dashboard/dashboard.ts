@@ -74,8 +74,8 @@ export class Dashboard implements OnInit {
       adherence: 76,
       statusLabel: 'Atenção',
       description:
-        '76% em conformidade. Necessita evolução em hardening, evidências e validações de segurança.'
-    },
+      '76% em conformidade. Necessita evolução em hardening (reforço de segurança), evidências e validações técnicas.'
+      },
     {
       name: 'MP15',
       area: 'Engenharia',
@@ -325,7 +325,7 @@ export class Dashboard implements OnInit {
       return {
         ...product,
         adherence: updatedAdherence,
-        description: `${updatedAdherence}% em conformidade. ${this.getProductBaseDescription(product.name)}`
+        description: `${updatedAdherence}% em conformidade. ${this.getProductBaseDescription(product.name, updatedAdherence)}`
       };
     });
 
@@ -369,7 +369,11 @@ export class Dashboard implements OnInit {
     ];
   }
 
-  private getProductBaseDescription(productName: string): string {
+  private getProductBaseDescription(productName: string, adherence?: number): string {
+    if (adherence === 100) {
+      return 'Produto em conformidade total com os requisitos monitorados do PCI DSS.';
+    }
+
     if (productName === 'MP35') {
       return 'Necessita evolução em hardening, evidências e validações de segurança.';
     }
@@ -474,4 +478,4 @@ export class Dashboard implements OnInit {
   getProgressBarWidth(value: number): string {
     return `${value}%`;
   }
-} 
+}
