@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 type TaskStatus = 'Concluído' | 'Em andamento' | 'Pendente';
 
@@ -25,10 +26,16 @@ interface ProductComplianceItem {
   description: string;
 }
 
+interface ChatMessage {
+  sender: 'ai' | 'user';
+  text: string;
+  time: string;
+}
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
@@ -54,9 +61,9 @@ export class Dashboard implements OnInit {
     },
     {
       title: 'Itens críticos pendentes',
-      value: '9',
+      value: '4',
       badge: 'Em aberto',
-      description: 'Pendências prioritárias para evolução rumo ao PCI DSS'
+      description: 'Produtos com pendências para atingir 100% de aderência ao PCI DSS'
     }
   ];
 
@@ -127,10 +134,10 @@ export class Dashboard implements OnInit {
   selectedProduct = 'MP35';
 
   mockPrompt =
-    'Analise o produto MP35 e informe o que ainda falta para ele avançar no processo de aderência ao PCI DSS. Depois faça uma leitura geral dos equipamentos e da plataforma Tap2Pay.';
+    'O que ainda falta para o MP35 atingir 100% de aderência ao PCI DSS?';
 
   aiSummary =
-    'A IA identificou que o MP35 ainda depende de ajustes em controles técnicos, formalização de evidências e revisão de requisitos pendentes. No consolidado geral, os terminais apresentam maior volume de pendências do que a plataforma Tap2Pay.';
+    'A IA identificou que o MP35 ainda depende de ajustes em controles técnicos, formalização de evidências e revisão de requisitos pendentes.';
 
   aiSuggestions: TaskItem[] = [
     {
@@ -153,6 +160,16 @@ export class Dashboard implements OnInit {
     }
   ];
 
+  chatInput = 'O que ainda falta para o MP35 atingir 100% de aderência ao PCI DSS?';
+
+  chatMessages: ChatMessage[] = [
+    {
+      sender: 'ai',
+      text: 'Olá! Sou a GerzInhA. Posso analisar a aderência PCI DSS de um produto e sugerir os próximos passos.',
+      time: '16:48'
+    }
+  ];
+
   ngOnInit(): void {
     this.loadTasks();
     this.removeExpiredCompletedTasks();
@@ -169,10 +186,42 @@ export class Dashboard implements OnInit {
 
   selectProduct(productName: string): void {
     this.selectedProduct = productName;
+    this.isAiPanelOpen = true;
+    this.chatInput = `O que ainda falta para o ${productName} atingir 100% de aderência ao PCI DSS?`;
+  }
 
-    this.mockPrompt = `Analise o produto ${productName} e informe o que ainda falta para ele avançar no processo de aderência ao PCI DSS. Depois faça uma leitura geral dos equipamentos e da plataforma Tap2Pay.`;
+  sendChatMessage(): void {
+    const question = this.chatInput.trim();
 
-    this.aiSummary = `${productName} ainda possui lacunas em aderência PCI DSS relacionadas a controles, evidências e validações técnicas. No cenário consolidado, a IA recomenda priorizar os produtos com menor percentual de aderência para acelerar a evolução do portfólio.`;
+    if (!question) {
+      return;
+    }
+
+    this.chatMessages.push({
+      sender: 'user',
+      text: question,
+      time: this.getCurrentTime()
+    });
+
+    this.mockPrompt = question;
+    this.generateAiResponse(question);
+    this.chatInput = '';
+  }
+
+  private generateAiResponse(question: string): void {
+    const productName = this.detectProductFromQuestion(question) ?? this.selectedProduct;
+
+    this.selectedProduct = productName;
+
+    this.aiSummary =
+      `${productName} ainda possui lacunas em aderência PCI DSS relacionadas a controles, evidências e validações técnicas. A recomendação é priorizar os itens com maior impacto para acelerar a evolução do produto.`;
+
+    this.chatMessages.push({
+      sender: 'ai',
+      text:
+        `Analisando o ${productName}, ainda faltam evidências técnicas, revisão de controles de segurança e consolidação documental para avançar na aderência ao PCI DSS. Com base nisso, gerei sugestões de ação para o time.`,
+      time: this.getCurrentTime()
+    });
 
     this.aiSuggestions = [
       {
@@ -183,16 +232,33 @@ export class Dashboard implements OnInit {
       {
         title: `Consolidar evidências técnicas do ${productName}`,
         subtitle:
-          'Organizar documentação e comprovações necessárias para auditoria',
+          'Organizar documentação e comprovações necessárias para auditoria PCI DSS',
         status: 'Pendente'
       },
       {
-        title: 'Atualizar visão consolidada de aderência',
+        title: `Priorizar plano de ação do ${productName}`,
         subtitle:
-          'Comparar engenharia e plataforma para direcionar as próximas ações',
+          'Definir próximos passos para acelerar a aderência e reduzir pendências abertas',
         status: 'Pendente'
       }
     ];
+  }
+
+  private detectProductFromQuestion(question: string): string | null {
+    const normalizedQuestion = question.toLowerCase();
+
+    const matchedProduct = this.products.find((product) =>
+      normalizedQuestion.includes(product.name.toLowerCase())
+    );
+
+    return matchedProduct ? matchedProduct.name : null;
+  }
+
+  private getCurrentTime(): string {
+    return new Date().toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   }
 
   addAiSuggestionsToTasks(): void {
@@ -291,21 +357,13 @@ export class Dashboard implements OnInit {
         description:
           pendingItems === 0
             ? 'Todos os produtos atingiram 100% de aderência ao PCI DSS'
-            : 'Pendências prioritárias para evolução rumo ao PCI DSS'
+            : 'Produtos com pendências para atingir 100% de aderência ao PCI DSS'
       }
     ];
   }
 
   private calculatePendingItems(): number {
-    const missingPoints = this.products.reduce((accumulator, product) => {
-      return accumulator + (100 - product.adherence);
-    }, 0);
-
-    if (missingPoints === 0) {
-      return 0;
-    }
-
-    return Math.ceil(missingPoints / 10);
+    return this.products.filter((product) => product.adherence < 100).length;
   }
 
   private calculateAverageAdherence(): number {
@@ -314,7 +372,7 @@ export class Dashboard implements OnInit {
       0
     );
 
-    return Math.round(total / this.products.length);
+    return Math.floor(total / this.products.length);
   }
 
   private calculateAreaAverage(area: 'Engenharia' | 'Plataforma'): number {
@@ -327,28 +385,13 @@ export class Dashboard implements OnInit {
       0
     );
 
-    return Math.round(total / filteredProducts.length);
+    return Math.floor(total / filteredProducts.length);
   }
 
   private saveMetrics(): void {
     localStorage.setItem('dashboard_metrics', JSON.stringify(this.metrics));
     localStorage.setItem('dashboard_products', JSON.stringify(this.products));
   }
-
-  /*
-  private loadMetrics(): void {
-    const savedMetrics = localStorage.getItem('dashboard_metrics');
-    const savedProducts = localStorage.getItem('dashboard_products');
-
-    if (savedMetrics) {
-      this.metrics = JSON.parse(savedMetrics);
-    }
-
-    if (savedProducts) {
-      this.products = JSON.parse(savedProducts);
-    }
-  }
-  */
 
   private saveTasks(): void {
     localStorage.setItem('dashboard_tasks', JSON.stringify(this.taskList));
@@ -383,5 +426,25 @@ export class Dashboard implements OnInit {
 
   private randomBetween(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  get overallAdherence(): number {
+    const metric = this.metrics.find(
+      (item) => item.title === 'Aderência geral PCI DSS'
+    );
+
+    if (!metric) {
+      return 0;
+    }
+
+    return Number(metric.value.replace('%', ''));
+  }
+
+  get remainingToGoal(): number {
+    return Math.max(100 - this.overallAdherence, 0);
+  }
+
+  getProgressBarWidth(value: number): string {
+    return `${value}%`;
   }
 }
